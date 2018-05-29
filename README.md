@@ -77,6 +77,33 @@ Restrictions
 ------------
 This module expects the SQS and SNS topic to be in the same region.  
 
+Testing
+-------
+To test the Lambda function,
+
+1. Open the Amazon SES console at https://console.aws.amazon.com/ses/.
+
+2. In the column on the left, choose either Email Addresses or Domains.
+
+3. Select a verified email address or domain, and then choose Send a Test Email.
+
+4. For To:, type bounce@simulator.amazonses.com. For Subject and Body, type some sample text. Choose Send Test Email.
+
+5. Repeat steps 3 and 4 to create another test message, but this time, for To:, type complaint@simulator.amazonses.com.
+
+6. Open the Amazon SQS console at https://console.aws.amazon.com/sqs/. The Messages Available column should indicate that 2 messages are available.
+
+7. Open the Lambda console at https://console.aws.amazon.com/lambda/.
+
+8. In the navigation bar, choose Functions.
+
+9. In the list of functions, choose the function you created in Part 6: Create an AWS Lambda Function.
+
+10. Choose Test. When the function finishes running, expand the Details section. If the Lambda function was configured properly, you will receive one of the following messages:
+
+> null: Indicates that the function ran without errors.
+> Queue empty: Indicates that there were no new bounce or complaint notifications in the queue.
+
 References
 ----------
 * [Appendix: Create a Deliverability Dashboard](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/bouncecomplaintdashboard.html)
