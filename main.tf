@@ -1,31 +1,35 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
+resource "random_id" "bucket" {
+  byte_length = 10
+}
+
 locals {
-  queue_name = "email-delivery-queue"
+  bucket_name = "${length(var.unique_bucket_name) > 0 ? var.unique_bucket_name : format("email-delivery-dashboard-%s", random_id.bucket.hex)}"
 }
 
 resource "aws_sns_topic" "email_delivery_topic" {
-  name = "email-delivery-topic"
+  name = "${var.email_delivery_topic_name}"
 }
 
 resource "aws_sqs_queue" "email_delivery_queue" {
-  name                       = "${local.queue_name}"
+  name                       = "${var.queue_name}"
   visibility_timeout_seconds = 300
 
   policy = <<EOF
 {
   "Version": "2012-10-17",
-  "Id": "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${local.queue_name}/SQSDefaultPolicy",
+  "Id": "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.queue_name}/SQSDefaultPolicy",
   "Statement": [
     {
-      "Sid": "${local.queue_name}",
+      "Sid": "${var.queue_name}",
       "Effect": "Allow",
       "Principal": {
         "AWS": "*"
       },
       "Action": "SQS:SendMessage",
-      "Resource": "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${local.queue_name}",
+      "Resource": "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.queue_name}",
       "Condition": {
         "ArnEquals": {
           "aws:SourceArn": "arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_sns_topic.email_delivery_topic.name}"
@@ -46,8 +50,17 @@ resource "aws_sns_topic_subscription" "email_delivery_queue_topic_subscription" 
 }
 
 resource "aws_s3_bucket" "dashboard_bucket" {
-  bucket = "${var.unique_bucket_name}"
+  bucket = "${local.bucket_name}"
   acl    = "private"
+
+  lifecycle_rule {
+    id      = "retention"
+    enabled = true
+
+    expiration {
+      days = "${var.report_retention_days}"
+    }
+  }
 
   tags = "${merge(var.tags, map("Name", "Email Delivery Dashboard"))}"
 }
@@ -58,58 +71,53 @@ resource "aws_iam_policy" "email_delivery_dashboard_policy" {
 
   policy = <<EOF
 {
-   "Version": "2012-10-17",
-   "Statement": [
-       {
-           "Sid": "AllowSendEmail",
-           "Effect": "Allow",
-           "Action": [
-               "ses:SendEmail"
-           ],
-           "Resource": [
-               "*"
-           ]
-       },
-       {
-           "Sid": "s3allow",
-           "Effect": "Allow",
-           "Action": [
-               "s3:PutObject",
-               "s3:PutObjectAcl"
-           ],
-           "Resource": [
-               "arn:aws:s3:::${aws_s3_bucket.dashboard_bucket.id}/*"
-           ]
-       },
-       {
-           "Sid": "AllowQueuePermissions",
-           "Effect": "Allow",
-           "Action": [
-               "sqs:ChangeMessageVisibility",
-               "sqs:ChangeMessageVisibilityBatch",
-               "sqs:DeleteMessage",
-               "sqs:DeleteMessageBatch",
-               "sqs:GetQueueAttributes",
-               "sqs:GetQueueUrl",
-               "sqs:ReceiveMessage"
-           ],
-           "Resource": [
-               "${aws_sqs_queue.email_delivery_queue.arn}"
-           ]
-       },
-       {
-           "Effect": "Allow",
-           "Action": [
-               "logs:CreateLogGroup",
-               "logs:CreateLogStream",
-               "logs:PutLogEvents",
-               "logs:DescribeLogStreams"
-           ],
-           "Resource": [
-               "arn:aws:logs:*:*:*"
-           ]
-       }
-   ]
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+          "Effect": "Allow",
+          "Action": ["sns:Publish"],
+          "Resource": "${aws_cloudformation_stack.email-dashboard-to-sns-topic.outputs["ARN"]}"
+      },
+      {
+          "Sid": "s3allow",
+          "Effect": "Allow",
+          "Action": [
+              "s3:PutObject",
+              "s3:PutObjectAcl"
+          ],
+          "Resource": [
+              "arn:aws:s3:::${aws_s3_bucket.dashboard_bucket.id}/*"
+          ]
+      },
+      {
+          "Sid": "AllowQueuePermissions",
+          "Effect": "Allow",
+          "Action": [
+              "sqs:ChangeMessageVisibility",
+              "sqs:ChangeMessageVisibilityBatch",
+              "sqs:DeleteMessage",
+              "sqs:DeleteMessageBatch",
+              "sqs:GetQueueAttributes",
+              "sqs:GetQueueUrl",
+              "sqs:ReceiveMessage"
+          ],
+          "Resource": [
+              "${aws_sqs_queue.email_delivery_queue.arn}"
+          ]
+      },
+      {
+          "Effect": "Allow",
+          "Action": [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents",
+              "logs:DescribeLogStreams"
+          ],
+          "Resource": [
+              "arn:aws:logs:*:*:*"
+          ]
+      }
+    ]
 }
 EOF
 }
@@ -159,11 +167,14 @@ resource "aws_lambda_function" "dashboard_lambda" {
 
   environment {
     variables = {
-      QueueURL   = "${aws_sqs_queue.email_delivery_queue.id}"
-      Region     = "${data.aws_region.current.name}"
-      ToAddr     = "${var.to_addr}"
-      SrcAddr    = "${var.from_addr}"
-      BucketName = "${aws_s3_bucket.dashboard_bucket.id}"
+      QueueURL                 = "${aws_sqs_queue.email_delivery_queue.id}"
+      Region                   = "${data.aws_region.current.name}"
+      EmailReportToTopic       = "${aws_cloudformation_stack.email-dashboard-to-sns-topic.outputs["ARN"]}"
+      ToAddr                   = "${var.to_addr}"
+      EmailIntroductionMessage = "${var.email_introduction_message}"
+
+      BucketName   = "${aws_s3_bucket.dashboard_bucket.id}"
+      BucketPrefix = "${var.bucket_prefix}"
     }
   }
 }

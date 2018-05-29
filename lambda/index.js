@@ -1,15 +1,15 @@
 var AWS = require('aws-sdk');
-var ses = new AWS.SES({ apiVersion: '2010-12-01' });
+var sns = new AWS.SNS({ apiVersion: '2010-03-31' });
 var sqs = new AWS.SQS({ region: process.env.Region, httpOptions: { agent: agent } });
 var s3 = new AWS.S3();
 var https = require('https');
 var agent = new https.Agent({ maxSockets: 150 });
 var fs = require('fs');
 var queueURL = process.env.QueueURL;
-var toddresses = process.env.ToAddr;
-var srcaddr = process.env.SrcAddr;
 var bucket = process.env.BucketName;
 var prefix = process.env.BucketPrefix;
+var emailToTopic = process.env.EmailReportToTopic;
+var emailIntroductionMessage = process.env.EmailIntroductionMessage;
 var qSize = null;
 var content = null;
 var queueParams = {AttributeNames: ["ApproximateNumberOfMessages"], QueueUrl: queueURL};
@@ -18,7 +18,8 @@ var queueParams = {AttributeNames: ["ApproximateNumberOfMessages"], QueueUrl: qu
 exports.handler = (event, context, callback) => {
     var date = (new Date()).toString().split(' ').splice(1, 4).join('-');
     var url = null;
-
+    var messageCount = 0;
+    
     function s3upload() {
         if (prefix == undefined) {
             prefix = "";
@@ -35,7 +36,7 @@ exports.handler = (event, context, callback) => {
             else console.log(data);
             url = data.Location;
             console.log("uploading to s3");
-            if (toddresses) {
+            if (emailToTopic) {
                 sendMail();
             }
             //context.done();
@@ -43,30 +44,15 @@ exports.handler = (event, context, callback) => {
     }
 
     function sendMail() {
-        //console.log("message: " +  messages);
-        var params = {
-            Destination: {
-                ToAddresses: [toddresses,]
-            },
-            Message: {
-                Body: {
-                    Html: {
-                        Data: url,
-                        Charset: 'utf-8'
-                    },
-                    Text: {
-                        Data: "report",
-                        Charset: 'utf-8'
-                    }
-                },
-                Subject: {
-                    Data: "[SES] Daily -  Notification Reports",
-                    Charset: 'utf-8'
-                }
-            },
-            Source: srcaddr,
-        };
-        ses.sendEmail(params, function (err, data) {
+        var emailMessage = `${emailIntroductionMessage}
+
+There were ${messageCount} Bounced emails or complaints.
+Please review the report at ${url}`;
+
+        sns.publish({
+            TargetArn: emailToTopic,
+            Message: emailMessage
+        }, function (err, data) {
             if (err) console.log(err, err.stack);
             else console.log(data);
             console.log("sending email");
@@ -95,7 +81,6 @@ exports.handler = (event, context, callback) => {
                 console.log(err);
                 throw err;
             }
-            // console.log("Data removed. Response = " + data);  
         });
     }
 
@@ -120,7 +105,6 @@ exports.handler = (event, context, callback) => {
                     throw err;
                 }
 
-                // console.log("data with message = " + data.Messages);
                 if (data.Messages) {
                     var message = data.Messages[0];
                     body = JSON.parse(message.Body);
@@ -206,7 +190,7 @@ exports.handler = (event, context, callback) => {
                         var middle = bp + sp + bt + cp;
                         var end = fs.readFileSync('template/end.html', 'utf8');
                         content = begin + middle + end;
-
+                        messageCount = messages.length;
                         s3upload();
 
                     }
