@@ -33,7 +33,7 @@ exports.handler = (event, context, callback) => {
         };
         s3.upload(param, function (err, data) {
             if (err) console.log(err, err.stack); // an error occurred
-            else console.log(data);
+            //else console.log(data);
             url = data.Location;
             console.log("uploading to s3");
             if (emailToTopic) {
@@ -54,7 +54,7 @@ Please review the report at ${url}`;
             Message: emailMessage
         }, function (err, data) {
             if (err) console.log(err, err.stack);
-            else console.log(data);
+            //else console.log(data);
             console.log("sending email");
             context.done();
         });
@@ -82,6 +82,15 @@ Please review the report at ${url}`;
                 throw err;
             }
         });
+    }
+    
+    function row(type,btype,bsubtype,sender,destination,diagcode,time,id) {
+        var otr = "<tr>";
+        var ftr = "</tr>";
+        var oline = "<td>";
+        var cline = "</td>";
+
+        return otr + oline + type + cline + oline + btype + cline + oline + bsubtype + cline + oline + sender + cline + oline + destination + cline + oline + diagcode + cline + oline + time + cline + oline + id + cline + ftr;
     }
 
     //Start Receive message
@@ -111,51 +120,52 @@ Please review the report at ${url}`;
                     msg = JSON.parse(body.Message);
                     try {
                         var destination = msg.mail.destination[0];
+                        var sender = msg.mail.source;
                         var type = msg.notificationType;
                         var time = msg.mail.timestamp;
                         var id = msg.mail.messageId;
-                        var otr = "<tr>";
-                        var ftr = "</tr>";
-                        var oline = "<td>";
-                        var cline = "</td>";
                         var btype = null;
                         var bsubtype = null;
                         var diagcode = null;
     
                         //console.log(msg);
+
     
                         if (type == "Bounce") {
                             btype = msg.bounce.bounceType; // Permanent || Transient
                             bsubtype = msg.bounce.bounceSubType; // General || Supressed
                             if (btype == "Permanent" && bsubtype == "Suppressed") {
                                 diagcode = "Suppressed by SES";
-                                text = otr + oline + type + cline + oline + btype + cline + oline + bsubtype + cline + oline + destination + cline + oline + diagcode + cline + oline + time + cline + oline + id + cline + ftr;
-                                msgSuppres.push(text);
-    
+                                msg.bounce.bouncedRecipients.forEach((recipient) => {
+                                    text = row(type,btype,bsubtype,sender,recipient.emailAddress,diagcode,time,id);
+                                    msgSuppres.push(text);
+                                });
                             } else if (btype == "Permanent" && bsubtype == "General") {
-                                diagcode = msg.bounce.bouncedRecipients[0].diagnosticCode;
-                                text = otr + oline + type + cline + oline + btype + cline + oline + bsubtype + cline + oline + destination + cline + oline + diagcode + cline + oline + time + cline + oline + id + cline + ftr;
-                                msgBouncePerm.push(text);
-    
+                                msg.bounce.bouncedRecipients.forEach((recipient) => {
+                                    diagcode = recipient.diagnosticCode;
+                                    text = row(type,btype,bsubtype,sender,recipient.emailAddress,diagcode,time,id);
+                                    msgBouncePerm.push(text);
+                                });
                             } else if (btype == "Permanent" && bsubtype == "NoEmail") {
                                 diagcode = msg.bounce.bouncedRecipients[0].diagnosticCode;
-                                text = otr + oline + type + cline + oline + btype + cline + oline + bsubtype + cline + oline + destination + cline + oline + diagcode + cline + oline + time + cline + oline + id + cline + ftr;
+                                text =row(type,btype,bsubtype,sender,destination,diagcode,time,id);
                                 msgBouncePerm.push(text);
     
                             } else if (btype == "Undetermined") {
                                 diagcode = msg.bounce.bouncedRecipients[0].diagnosticCode;
-                                text = otr + oline + type + cline + oline + btype + cline + oline + bsubtype + cline + oline + destination + cline + oline + diagcode + cline + oline + time + cline + oline + id + cline + ftr;
+                                text = row(type,btype,bsubtype,sender,destination,diagcode,time,id);
                                 msgBouncePerm.push(text);
     
                             } else if (btype == "Transient") {
                                 diagcode = "soft-Bounce";
-                                text = otr + oline + type + cline + oline + btype + cline + oline + bsubtype + cline + oline + destination + cline + oline + diagcode + cline + oline + time + cline + oline + id + cline + ftr;
-                                msgBounceTrans.push(text);
-    
+                                msg.bounce.bouncedRecipients.forEach((recipient) => {
+                                    text = row(type,btype,bsubtype,sender,recipient.emailAddress,diagcode,time,id);
+                                    msgBounceTrans.push(text);
+                                });
                             } else {
                                 console.log("it's an unknown bounce");
                                 diagcode = "unknown";
-                                text = otr + oline + type + cline + oline + btype + cline + oline + bsubtype + cline + oline + destination + cline + oline + diagcode + cline + oline + time + cline + oline + id + cline + ftr;
+                                text = row(type,btype,bsubtype,sender,destination,diagcode,time,id);
                                 msgBouncePerm.push(text);
                             }
     
@@ -166,7 +176,7 @@ Please review the report at ${url}`;
                             btype = "null";
                             bsubtype = "null";
                             diagcode = "null";
-                            text = otr + oline + type + cline + oline + btype + cline + oline + bsubtype + cline + oline + destination + cline + oline + diagcode + cline + oline + time + cline + oline + id + cline + ftr;
+                            text = row(type,btype,bsubtype,sender,destination,diagcode,time,id);
     
                             msgComplaint.push(text);
     
