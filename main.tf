@@ -170,7 +170,6 @@ resource "aws_lambda_function" "dashboard_lambda" {
       QueueURL                 = "${aws_sqs_queue.email_delivery_queue.id}"
       Region                   = "${data.aws_region.current.name}"
       EmailReportToTopic       = "${aws_cloudformation_stack.email-dashboard-to-sns-topic.outputs["ARN"]}"
-      ToAddr                   = "${var.to_addr}"
       EmailIntroductionMessage = "${var.email_introduction_message}"
 
       BucketName   = "${aws_s3_bucket.dashboard_bucket.id}"

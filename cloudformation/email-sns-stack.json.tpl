@@ -7,10 +7,7 @@
       "Properties" : {
         "DisplayName" : "${display_name}",
         "Subscription": [
-          {
-           "Endpoint" : "${email_address}",
-           "Protocol" : "${protocol}"
-          }
+          ${email_addresses}
         ]
       }
     }

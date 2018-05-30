@@ -8,7 +8,7 @@ provider "aws" {
 
 module "dashboard" {
   source                     = "../../"
-  to_addr                    = "${var.to_addr}"
+  to_addresses               = ["${var.to_addr}"]
   email_from_display_name    = "Bounced Emails Dashboard"
   email_introduction_message = "Bounced emails, or complaint emails, have been received for this account. <b>Some bold text (maybe)</b>"
 }

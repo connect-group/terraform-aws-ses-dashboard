@@ -21,7 +21,7 @@ resource "aws_route53_record" "example_amazonses_verification_record" {
 
 module "dashboard" {
   source                     = "connect-group/ses-dashboard/aws"
-  to_addr                    = "someone@example.com"
+  to_addresses               = ["someone@example.com", "someone.else@example.com"]
   email_from_display_name    = "Bounced Emails Dashboard"
   email_introduction_message = "Bounced emails, or complaint emails, have been received for this account."
 }
@@ -62,16 +62,11 @@ If your email identity is managed manually then you will need to  configure SES 
 
 6. Repeat steps 3–5 for each email address that should receive bounce or complaint notifications.
 
-7. Open the Amazon SQS console at https://console.aws.amazon.com/sqs/.
-
-8. Right-click the queue 'email-delivery-queue', and then choose Purge Queue.
-
 
 > **Note**
 >
-> This step is required. When you configure notifications, Amazon SES sends a confirmation notification that
-> is picked up by Amazon SNS. These confirmations cannot be parsed by the Lambda function, and may cause the
-> Lambda function to fail.
+> Unlike the example AWS Dashboard - *there is no need to purge the SQS queue*.  
+> This version of the lambda will ignore items in the queue that it cannot parse.
 
 Restrictions
 ------------

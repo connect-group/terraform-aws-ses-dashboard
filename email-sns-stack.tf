@@ -2,9 +2,8 @@ data "template_file" "cloudformation_sns_stack" {
   template = "${file("${path.module}/cloudformation/email-sns-stack.json.tpl")}"
 
   vars {
-    display_name  = "${var.email_from_display_name}"
-    email_address = "${var.to_addr}"
-    protocol      = "email"
+    display_name    = "${var.email_from_display_name}"
+    email_addresses = "${join(",", formatlist("{\"Endpoint\": \"%s\", \"Protocol\": \"email\"}", var.to_addresses))}"
   }
 }
 

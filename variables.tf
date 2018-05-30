@@ -1,5 +1,6 @@
-variable "to_addr" {
-  description = "[Required] The email address that will receive the bounce and complaint report."
+variable "to_addresses" {
+  type        = "list"
+  description = "[Required] The email addresses that will receive the bounce and complaint report."
 }
 
 variable "unique_bucket_name" {
