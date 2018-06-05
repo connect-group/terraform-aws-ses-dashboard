@@ -158,9 +158,10 @@ box-shadow: 7px 4px 10px 0px rgba(0,0,0,0.53);  }
         </div>
         
         <div>
-          <input class="form-control" type="text" id="myInputemail" onkeyup="myFunctionemail()" placeholder="Search for email .." title="Type in a name">
-          <input class="form-control" type="text" id="myInputid" onkeyup="myFunctionid()" placeholder="Search for messageID .." title="Type in a name">
-          <input class="form-control" type="text" id="myInputtype" onkeyup="myFunctiontype()" placeholder="Search for Type .." title="Type in a name">
+          <input class="form-control" type="text" id="myInputSender" onkeyup="filter('myInputSender', 3)" placeholder="Search for Sender .." title="Type in an email">
+          <input class="form-control" type="text" id="myInputRecipient" onkeyup="filter('myInputRecipient', 4)" placeholder="Search for Recipient .." title="Type in an email">
+          <input class="form-control" type="text" id="myInputId" onkeyup="filter('myInputId', 7)" placeholder="Search for messageID .." title="Type in an ID">
+          <input class="form-control" type="text" id="myInputType" onkeyup="filter('myInputType', 0)" placeholder="Search for Type .." title="e.g. Bounce">
         </div>
 
         <h2 class="sub-header">Daily Summary</h2>

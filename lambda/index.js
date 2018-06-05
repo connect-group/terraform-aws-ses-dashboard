@@ -47,7 +47,26 @@ exports.handler = (event, context, callback) => {
         var emailMessage = `${emailIntroductionMessage}
 
 There were ${messageCount} Bounced emails or complaints.
-Please review the report at ${url}`;
+
+Please review the report at ${url}
+
+
+
+
+
+Regards,
+
+
+AWS SES Email Dashboard.
+
+
+
+
+
+
+
+----------------------------------------------------------------
+`;
 
         sns.publish({
             TargetArn: emailToTopic,
