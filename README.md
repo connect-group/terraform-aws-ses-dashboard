@@ -32,7 +32,7 @@ resource "aws_ses_identity_notification_topic" "bounce_notifications" {
   identity          = "${aws_ses_domain_identity.example.domain}"
 }
 
-resource "aws_ses_identity_notification_topic" "bounce_notifications" {
+resource "aws_ses_identity_notification_topic" "complaint_notifications" {
   topic_arn         = "${module.dashboard.topic_arn}"
   notification_type = "Complaint"
   identity          = "${aws_ses_domain_identity.example.domain}"
