@@ -154,12 +154,12 @@ data "archive_file" "source" {
 }
 
 resource "aws_lambda_function" "dashboard_lambda" {
-  filename         = "${substr(data.archive_file.source.output_path, length(path.cwd) + 1, -1)}"
+  filename         = "${substr(data.archive_file.source.output_path, 0, length(path.cwd)) == path.cwd ? substr(data.archive_file.source.output_path, length(path.cwd) + 1, -1) : data.archive_file.source.output_path}"
   function_name    = "publish_ses_dashboard"
   role             = "${aws_iam_role.dashboard_role.arn}"
   handler          = "index.handler"
   source_code_hash = "${data.archive_file.source.output_base64sha256}"
-  runtime          = "nodejs8.10"
+  runtime          = "nodejs10.x"
   description      = "MANAGED BY TERRAFORM"
 
   memory_size = "512"
