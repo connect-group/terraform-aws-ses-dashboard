@@ -1,6 +1,14 @@
 SES Deliverability Dashboard
 ============================
-This module will create a [Bounce Complaint Dashboard](https://aws.amazon.com/blogs/messaging-and-targeting/creating-a-daily-dashboard-to-track-bounces-and-complaints/) that shows information about SES Email bounces and complaints.
+This module will create a [Bounce Complaint Dashboard](https://aws.amazon.com/blogs/messaging-and-targeting/creating-a-daily-dashboard-to-track-bounces-and-complaints/) report that shows information about SES Email bounces and complaints.
+
+> Bounce and complaint rates can have a negative impact on your sender reputation. This makes it less likely that the emails you send through Amazon SES will reach your recipients' inboxes. Additionally, if your bounce or complaint rate is too high, we may have to suspend your Amazon SES account to protect other users.
+> 
+> For these reasons, it is essential that you have a process to remove email addresses that bounced or complained from your recipient list. This section describes a sample tracking dashboard that you can use to track bounces and complaints using other AWS services. You can customize this solution to meet your specific needs.
+> 
+> When you use this terraform module, you will receive an email every day that includes a link. When you click the link, you see a dashboard that displays information about the numbers of bounces and complaints that were received in the previous 24-hour period. The dashboard also provides details about the messages that resulted in bounces and complaints. The following image shows an example of this dashboard.
+
+![](https://user-images.githubusercontent.com/1678311/67145683-265c6780-f27b-11e9-95f3-51d5889e19c9.png)
 
 Note, the original article on which this is based was taken down in May 2019.  This terraform solution will still work.
 
