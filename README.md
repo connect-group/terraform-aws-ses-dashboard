@@ -101,6 +101,10 @@ To test the Lambda function,
 > null: Indicates that the function ran without errors.
 > Queue empty: Indicates that there were no new bounce or complaint notifications in the queue.
 
+Compatibility
+-------------
+This module is compatible with Terraform 0.10.4 upwards. It has been tested with 0.12.12
+
 References
 ----------
 * [AWS Blog](https://aws.amazon.com/blogs/messaging-and-targeting/creating-a-daily-dashboard-to-track-bounces-and-complaints/)
