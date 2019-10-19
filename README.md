@@ -105,6 +105,8 @@ Compatibility
 -------------
 This module is compatible with Terraform 0.10.4 upwards. It has been tested with 0.12.12
 
+The AWS Provider must be on v2.11+ as earlier versions do not recognise "node10.x" as a valid Lambda runtime environment.
+
 References
 ----------
 * [AWS Blog](https://aws.amazon.com/blogs/messaging-and-targeting/creating-a-daily-dashboard-to-track-bounces-and-complaints/)
