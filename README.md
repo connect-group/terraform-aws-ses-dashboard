@@ -1,6 +1,8 @@
 SES Deliverability Dashboard
 ============================
-This module will create a [Deliverability Dashboard](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/bouncecomplaintdashboard.html) that shows information about SES Email bounces and complaints.
+This module will create a [Bounce Complaint Dashboard](https://aws.amazon.com/blogs/messaging-and-targeting/creating-a-daily-dashboard-to-track-bounces-and-complaints/) that shows information about SES Email bounces and complaints.
+
+Note, the original article on which this is based was taken down in May 2019.  This terraform solution will still work.
 
 It is a slight adaptation of the functionality described in the AWS Developer documentation because it uses an SNS Email topic to send the report, rather then sending it directly from a verified SES sender.  This elimates manual steps.
 
@@ -47,7 +49,7 @@ In order to capture bounce and complaint notifications, the verified email sende
 
 Email Identities cannot be created by Terraform or CloudFormation, but domain identities can be created (as in the example above).
 
-If your email identity is managed manually then you will need to  configure SES notificatins as described in [Part 5](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/dashboardconfigureSESnotifications.html) of the AWS tutorial.
+If your email identity is managed manually then you will need to  configure SES notifications as described in [Part 5](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/dashboardconfigureSESnotifications.html) of the AWS tutorial.
 
 1. Open the Amazon SES console at https://console.aws.amazon.com/ses/.
 
@@ -65,7 +67,7 @@ If your email identity is managed manually then you will need to  configure SES 
 
 > **Note**
 >
-> Unlike the example AWS Dashboard - *there is no need to purge the SQS queue*.  
+> Unlike the original articles AWS Dashboard - *there is no need to purge the SQS queue*.  
 > This version of the lambda will ignore items in the queue that it cannot parse.
 
 Restrictions
@@ -101,6 +103,7 @@ To test the Lambda function,
 
 References
 ----------
+* [AWS Blog](https://aws.amazon.com/blogs/messaging-and-targeting/creating-a-daily-dashboard-to-track-bounces-and-complaints/)
 * [Appendix: Create a Deliverability Dashboard](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/bouncecomplaintdashboard.html)
 
 
