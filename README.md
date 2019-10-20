@@ -118,6 +118,6 @@ The AWS Provider must be on v2.11+ as earlier versions do not recognise "node10.
 References
 ----------
 * [AWS Blog](https://aws.amazon.com/blogs/messaging-and-targeting/creating-a-daily-dashboard-to-track-bounces-and-complaints/)
-* [Appendix: Create a Deliverability Dashboard](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/bouncecomplaintdashboard.html)
+* [Appendix: Create a Deliverability Dashboard](https://github.com/connect-group/terraform-aws-ses-dashboard/wiki)
 
 
