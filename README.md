@@ -111,7 +111,8 @@ To test the Lambda function,
 
 Compatibility
 -------------
-This module is compatible with Terraform 0.10.4 upwards. It has been tested with 0.12.12
+The 1.0.6 release is compatible with Terraform 0.10.4 - 0.12
+The 2.0.0 release upgrades the syntax and is therefore compatible with Terraform 0.12-0.13.
 
 The AWS Provider must be on v2.11+ as earlier versions do not recognise "node10.x" as a valid Lambda runtime environment.
 

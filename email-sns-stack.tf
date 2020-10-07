@@ -14,7 +14,7 @@ data "template_file" "cloudformation_sns_stack" {
 }
 
 resource "aws_cloudformation_stack" "email-dashboard-to-sns-topic" {
-  name          = "email-delivery-dashboard-email-recipient"
+  name          = var.email_dashboard_name
   template_body = data.template_file.cloudformation_sns_stack.rendered
 
   tags = var.tags

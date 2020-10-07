@@ -43,3 +43,8 @@ variable "email_delivery_topic_name" {
   description = "[Optional] Name of the SNS Topic created by this module."
 }
 
+variable "email_dashboard_name" {
+  default     = "email-delivery-dashboard-email-recipient"
+  description = "[Optional] Name of CloudFormation stack."
+}
+
