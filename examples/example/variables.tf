@@ -1,5 +1,5 @@
 variable "to_addr" {
-	type = string
+  type        = string
   description = "Single Email address to send notifications to."
 }
 

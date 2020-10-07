@@ -1,5 +1,5 @@
 variable "to_addresses" {
-  type        = "list"
+  type        = list(string)
   description = "[Required] The email addresses that will receive the bounce and complaint report."
 }
 
@@ -42,3 +42,4 @@ variable "email_delivery_topic_name" {
   default     = "email-delivery-topic"
   description = "[Optional] Name of the SNS Topic created by this module."
 }
+
