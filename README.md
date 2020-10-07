@@ -102,7 +102,7 @@ To test the Lambda function,
 
 8. In the navigation bar, choose Functions.
 
-9. In the list of functions, choose the function you created in Part 6: Create an AWS Lambda Function.
+9. In the list of functions, choose the new lambda, "publish_ses_dashboard"
 
 10. Choose Test. When the function finishes running, expand the Details section. If the Lambda function was configured properly, you will receive one of the following messages:
 
