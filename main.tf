@@ -174,7 +174,7 @@ resource "aws_lambda_function" "dashboard_lambda" {
   role             = aws_iam_role.dashboard_role.arn
   handler          = "index.handler"
   source_code_hash = data.archive_file.source.output_base64sha256
-  runtime          = "nodejs10.x"
+  runtime          = "nodejs12.x"
   description      = "MANAGED BY TERRAFORM"
 
   memory_size = "512"
