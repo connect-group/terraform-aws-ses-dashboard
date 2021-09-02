@@ -75,7 +75,7 @@ resource "aws_s3_bucket" "dashboard_bucket" {
 }
 
 resource "aws_iam_policy" "email_delivery_dashboard_policy" {
-  name        = "email-delivery-dashboard-policy"
+  name        = var.unique_suffix == "" ? "email-delivery-dashboard-policy" : format("email-delivery-dashboard-policy-%s", var.unique_suffix)
   description = "Permissions for Email Delivery Dashboard"
 
   policy = <<EOF
@@ -133,7 +133,7 @@ EOF
 }
 
 resource "aws_iam_role" "dashboard_role" {
-  name = "email-delivery-dashboard-role"
+  name = var.unique_suffix == "" ? "email-delivery-dashboard-role" : format("email-delivery-dashboard-role-%s", var.unique_suffix)
 
   assume_role_policy = <<EOF
 {
@@ -170,7 +170,7 @@ resource "aws_lambda_function" "dashboard_lambda" {
     length(path.cwd) + 1,
     -1,
   ) : data.archive_file.source.output_path
-  function_name    = "publish_ses_dashboard"
+  function_name    = var.unique_suffix == "" ? "publish_ses_dashboard" : format("publish_ses_dashboard_%s", var.unique_suffix)
   role             = aws_iam_role.dashboard_role.arn
   handler          = "index.handler"
   source_code_hash = data.archive_file.source.output_base64sha256
@@ -193,7 +193,8 @@ resource "aws_lambda_function" "dashboard_lambda" {
 }
 
 resource "aws_cloudwatch_event_rule" "generate_dashboard" {
-  name                = "generate_email_dashboard"
+  name = var.unique_suffix == "" ? "generate_email_dashboard" : format("generate_email_dashboard_%s", var.unique_suffix)
+
   description         = "MANAGED BY TERRAFORM"
   schedule_expression = "cron(0 4 * * ? *)"
 }

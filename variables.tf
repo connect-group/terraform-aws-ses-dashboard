@@ -48,3 +48,7 @@ variable "email_dashboard_name" {
   description = "[Optional] Name of CloudFormation stack."
 }
 
+variable "unique_suffix" {
+  default = ""
+  description = "[Optional] Use to keep various resources unique if using more than once in an account "
+}
