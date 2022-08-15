@@ -6,7 +6,8 @@ terraform {
       source = "hashicorp/archive"
     }
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = ">=3.75.2"
     }
     random = {
       source = "hashicorp/random"

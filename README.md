@@ -34,6 +34,7 @@ module "dashboard" {
   to_addresses               = ["someone@example.com", "someone.else@example.com"]
   email_from_display_name    = "Bounced Emails Dashboard"
   email_introduction_message = "Bounced emails, or complaint emails, have been received for this account."
+  unique_suffix              = "optional-use-if-multiple-dashboards-in-an-account"
 }
 
 resource "aws_ses_identity_notification_topic" "bounce_notifications" {
@@ -114,7 +115,7 @@ Compatibility
 The 1.0.6 release is compatible with Terraform 0.10.4 - 0.12
 The 2.0.0 release upgrades the syntax and is therefore compatible with Terraform 0.12-0.13.
 
-The AWS Provider must be on v2.11+ as earlier versions do not recognise "node10.x" as a valid Lambda runtime environment.
+The AWS Provider must be on v3.75.2+ as earlier versions do not recognise "nodejs16.x" as a valid Lambda runtime environment.
 
 References
 ----------
