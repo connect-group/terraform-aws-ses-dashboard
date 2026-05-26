@@ -115,7 +115,7 @@ Compatibility
 The 1.0.6 release is compatible with Terraform 0.10.4 - 0.12
 The 2.0.0 release upgrades the syntax and is therefore compatible with Terraform 0.12-0.13.
 
-The AWS Provider must be on v3.75.2+ as earlier versions do not recognise "nodejs16.x" as a valid Lambda runtime environment.
+The AWS Provider must be on v5.0+ for nodejs24.x support. For older Node.js runtimes, use AWS Provider v3.75.2+.
 
 References
 ----------

@@ -49,6 +49,11 @@ variable "email_dashboard_name" {
 }
 
 variable "unique_suffix" {
-  default = ""
+  default     = ""
   description = "[Optional] Use to keep various resources unique if using more than once in an account "
+}
+
+variable "lambda_runtime" {
+  default     = "nodejs24.x"
+  description = "[Optional] Lambda function Node.js runtime version."
 }

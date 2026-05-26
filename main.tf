@@ -55,16 +55,6 @@ resource "aws_sns_topic_subscription" "email_delivery_queue_topic_subscription" 
 
 resource "aws_s3_bucket" "dashboard_bucket" {
   bucket = local.bucket_name
-  acl    = "private"
-
-  lifecycle_rule {
-    id      = "retention"
-    enabled = true
-
-    expiration {
-      days = var.report_retention_days
-    }
-  }
 
   tags = merge(
     var.tags,
@@ -72,6 +62,71 @@ resource "aws_s3_bucket" "dashboard_bucket" {
       "Name" = "Email Delivery Dashboard"
     },
   )
+}
+
+resource "aws_s3_bucket_ownership_controls" "dashboard_bucket" {
+  bucket = aws_s3_bucket.dashboard_bucket.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "dashboard_bucket" {
+  bucket = aws_s3_bucket.dashboard_bucket.id
+
+  block_public_acls       = false
+  block_public_policy     = true
+  ignore_public_acls      = false
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_acl" "dashboard_bucket" {
+  depends_on = [
+    aws_s3_bucket_ownership_controls.dashboard_bucket,
+    aws_s3_bucket_public_access_block.dashboard_bucket,
+  ]
+
+  bucket = aws_s3_bucket.dashboard_bucket.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "dashboard_bucket" {
+  bucket = aws_s3_bucket.dashboard_bucket.id
+
+  rule {
+    id     = "retention"
+    status = "Enabled"
+
+    expiration {
+      days = var.report_retention_days
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "dashboard_bucket" {
+  bucket = aws_s3_bucket.dashboard_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "DenyInsecureTransport"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          "arn:aws:s3:::${local.bucket_name}",
+          "arn:aws:s3:::${local.bucket_name}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      }
+    ]
+  })
 }
 
 resource "aws_iam_policy" "email_delivery_dashboard_policy" {
@@ -174,7 +229,7 @@ resource "aws_lambda_function" "dashboard_lambda" {
   role             = aws_iam_role.dashboard_role.arn
   handler          = "index.handler"
   source_code_hash = data.archive_file.source.output_base64sha256
-  runtime          = "nodejs16.x"
+  runtime          = var.lambda_runtime
   description      = "MANAGED BY TERRAFORM"
 
   memory_size = "512"
