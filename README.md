@@ -115,7 +115,12 @@ Compatibility
 The 1.0.6 release is compatible with Terraform 0.10.4 - 0.12
 The 2.0.0 release upgrades the syntax and is therefore compatible with Terraform 0.12-0.13.
 
-The AWS Provider must be on v5.0+ for nodejs24.x support. For older Node.js runtimes, use AWS Provider v3.75.2+.
+The AWS Provider must be on v6.0+, as this module reads `data.aws_region.current.region`
+(the `name` attribute it replaces is deprecated in provider v6).
+
+The Lambda handler uses the AWS SDK for JavaScript **v3** (`@aws-sdk/*`), which every
+currently supported Node.js runtime bundles. It will not run on `nodejs16.x` or earlier,
+because those runtimes shipped SDK v2 (`aws-sdk`) instead.
 
 References
 ----------
