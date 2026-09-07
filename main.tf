@@ -23,7 +23,7 @@ resource "aws_sqs_queue" "email_delivery_queue" {
   policy = <<EOF
 {
   "Version": "2012-10-17",
-  "Id": "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.queue_name}/SQSDefaultPolicy",
+  "Id": "arn:aws:sqs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:${var.queue_name}/SQSDefaultPolicy",
   "Statement": [
     {
       "Sid": "${var.queue_name}",
@@ -32,10 +32,10 @@ resource "aws_sqs_queue" "email_delivery_queue" {
         "AWS": "*"
       },
       "Action": "SQS:SendMessage",
-      "Resource": "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.queue_name}",
+      "Resource": "arn:aws:sqs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:${var.queue_name}",
       "Condition": {
         "ArnEquals": {
-          "aws:SourceArn": "arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_sns_topic.email_delivery_topic.name}"
+          "aws:SourceArn": "arn:aws:sns:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:${aws_sns_topic.email_delivery_topic.name}"
         }
       }
     }
@@ -238,7 +238,7 @@ resource "aws_lambda_function" "dashboard_lambda" {
   environment {
     variables = {
       QueueURL                 = aws_sqs_queue.email_delivery_queue.id
-      Region                   = data.aws_region.current.name
+      Region                   = data.aws_region.current.region
       EmailReportToTopic       = aws_cloudformation_stack.email-dashboard-to-sns-topic.outputs["ARN"]
       EmailIntroductionMessage = var.email_introduction_message
       BucketName               = aws_s3_bucket.dashboard_bucket.id
